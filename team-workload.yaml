@@ -1,0 +1,51 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: server-team
+  labels:
+    name: server-team
+spec:
+  ports:
+    - nodePort: 30003
+      port: 8082
+      targetPort: 8082
+      protocol: TCP
+  selector:
+    app: server-team
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-team
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server-team
+  template:
+    metadata:
+      name: server-team
+      labels:
+        app: server-team
+    spec:
+      containers:
+        - name: server-team
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-team-config
+                  key: postgres_user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-team-config
+                  key: postgres_password
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-team-config
+                  key: postgres_host
+          image: dariadenhub/server-team
